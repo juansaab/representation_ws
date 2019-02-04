@@ -9,6 +9,8 @@ class Boid {
   int sc = 3; // scale factor for the render of the boid
   float flap = 0;
   float t = 0;
+  int representationMode = 1; // 0: VertexVertex 1: WingedEdge
+  int renderingMode = 0; // 0: Immediate 1: Retained
 
   Boid(Vector inPos) {
     position = new Vector();
@@ -158,17 +160,41 @@ class Boid {
     Vertex v3 = new Vertex(-3 * sc, -2 * sc, 0);
     Vertex v4 = new Vertex(-3 * sc, 0, 2 * sc);
     
-    VertexVertex mesh = new VertexVertex();
-    Vertex[] nb1 = { v2, v3, v4 };
-    Vertex[] nb2 = { v1, v3, v4 };
-    Vertex[] nb3 = { v1, v2, v4 };
-    Vertex[] nb4 = { v1, v2, v3 };
-    mesh.put(v1, nb1);
-    mesh.put(v2, nb2);
-    mesh.put(v3, nb3);
-    mesh.put(v4, nb4);
+    if (this.representationMode == 0) {
+      VertexVertex mesh = new VertexVertex();
+      Vertex[] nb1 = { v2, v3, v4 };
+      Vertex[] nb2 = { v1, v3, v4 };
+      Vertex[] nb3 = { v1, v2, v4 };
+      Vertex[] nb4 = { v1, v2, v3 };
+      mesh.put(v1, nb1);
+      mesh.put(v2, nb2);
+      mesh.put(v3, nb3);
+      mesh.put(v4, nb4);
+      
+      if (this.renderingMode == 0) {
+        mesh.renderImmediate();
+      }
+      else {
+        shape(mesh.renderRetained());
+      }
+    }
     
-    mesh.render(0);
+    if (this.representationMode == 1) {
+      FaceVertex mesh = new FaceVertex();
+      Vertex[] face0 = {v1, v2, v3};
+      Vertex[] face1 = {v1, v2, v4};
+      Vertex[] face2 = {v2, v3, v4};
+      mesh.addFace(0, face0);
+      mesh.addFace(1, face1);
+      mesh.addFace(2, face2);
+
+      if (this.renderingMode == 0) {
+        mesh.renderImmediate();
+      } else {
+        shape(mesh.renderRetained());
+      }
+    }
+    
     
     /*beginShape(TRIANGLES);
     vertex(3 * sc, 0, 0);
