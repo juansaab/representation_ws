@@ -49,6 +49,7 @@ public class WingedEdge {
       for (int i = 0; i < vertexes.length; i++) {
         if(visited.contains(vertexes[i]) == false) {
           vertex(vertexes[i].get(0), vertexes[i].get(1), vertexes[i].get(2));
+          visited.add(vertexes[i]);
         }
       }
     }
@@ -63,7 +64,10 @@ public class WingedEdge {
       HashMap.Entry<Integer, Vertex[]> item = iterator.next();
       Vertex[] vertexes = item.getValue();
       for (int i = 0; i < vertexes.length; i++) {
-        s.vertex(vertexes[i].get(0), vertexes[i].get(1), vertexes[i].get(2));
+        if(visited.contains(vertexes[i]) == false) {
+          s.vertex(vertexes[i].get(0), vertexes[i].get(1), vertexes[i].get(2));
+          visited.add(vertexes[i]);
+        }
       }
     }
     s.endShape();

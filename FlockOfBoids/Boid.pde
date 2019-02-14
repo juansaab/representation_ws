@@ -9,8 +9,8 @@ class Boid {
   int sc = 3; // scale factor for the render of the boid
   float flap = 0;
   float t = 0;
-  int representationMode = 0; // 0: WingedEdge 1: FaceVertex
-  int renderingMode = 1; // 0: Immediate 1: Retained
+  int representationMode = 1; // 0: WingedEdge 1: FaceVertex 2: VertexVertex
+  int renderingMode = 0; // 0: Immediate 1: Retained
   
   LimitedSizeQueue<Vector> bezierPoints = new LimitedSizeQueue(4);
   PShape g;
@@ -146,7 +146,7 @@ class Boid {
     stroke(255, 102, 0);
     if (this.bezierPoints.size() == 4) {
       vertex(this.bezierPoints.get(0).x() / sc, this.bezierPoints.get(0).y() / sc, this.bezierPoints.get(0).z() / sc);
-      println("Bezier: " + this.bezierPoints);
+      //println("Bezier: " + this.bezierPoints);
     }
     endShape();
     popStyle();
@@ -159,7 +159,6 @@ class Boid {
     strokeWeight(2);
     stroke(color(40, 255, 40));
     fill(color(0, 255, 0, 125));
-
     // highlight boids under the mouse
     if (scene.trackedFrame("mouseMoved") == frame) {
       stroke(color(0, 0, 255));
@@ -180,11 +179,8 @@ class Boid {
     
     if (this.representationMode == 0) {
       pushStyle();
-    // uncomment to draw boid axes
-    //scene.drawAxes(10);
-
-    strokeWeight(2);
-    stroke(color(40, 255, 40));
+      // uncomment to draw boid axes
+      //scene.drawAxes(10);
       WingedEdge mesh = new WingedEdge();
       Vertex[] face0 = {v1, v2, v3};
       Vertex[] face1 = {v1, v2, v4};
@@ -218,27 +214,24 @@ class Boid {
       }
     }
     
+    if (this.representationMode == 2) {
+      VertexVertex mesh = new VertexVertex();
+      Vertex[] nb1 = { v2, v3, v4 };
+      Vertex[] nb2 = { v1, v3, v4 };
+      Vertex[] nb3 = { v1, v2, v4 };
+      Vertex[] nb4 = { v1, v2, v3 };
+      mesh.put(v1, nb1);
+      mesh.put(v2, nb2);
+      mesh.put(v3, nb3);
+      mesh.put(v4, nb4);
+      
+      if (this.renderingMode == 0) {
+        mesh.renderImmediate();
+      }
+      else {
+        shape(mesh.renderRetained());
+      }
+    }
     
-    /*beginShape(TRIANGLES);
-    vertex(3 * sc, 0, 0);
-    vertex(-3 * sc, 2 * sc, 0);
-    vertex(-3 * sc, -2 * sc, 0);
-
-    vertex(3 * sc, 0, 0);
-    vertex(-3 * sc, 2 * sc, 0);
-    vertex(-3 * sc, 0, 2 * sc);
-
-    vertex(3 * sc, 0, 0);
-    vertex(-3 * sc, 0, 2 * sc);
-    vertex(-3 * sc, -2 * sc, 0);
-
-    vertex(-3 * sc, 0, 2 * sc);
-    vertex(-3 * sc, 2 * sc, 0);
-    vertex(-3 * sc, -2 * sc, 0);
-    endShape();*/
-
-    popStyle();
-    
-    // drawBezier();
   }
 }
