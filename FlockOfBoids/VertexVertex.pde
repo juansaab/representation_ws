@@ -39,7 +39,7 @@ public class VertexVertex {
     PShape s = createShape();
     s.beginShape();
     Iterator<HashMap.Entry<Vertex, Vertex[]>> iterator = this.vertexList.entrySet().iterator();
-    while (iterator.hasNext()) {
+      while (iterator.hasNext()) {
       HashMap.Entry<Vertex, Vertex[]> item = iterator.next();
       Vertex v = item.getKey();
       Vertex[] neighbours = item.getValue();

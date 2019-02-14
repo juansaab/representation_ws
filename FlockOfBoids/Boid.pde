@@ -9,10 +9,14 @@ class Boid {
   int sc = 3; // scale factor for the render of the boid
   float flap = 0;
   float t = 0;
-  int representationMode = 1; // 0: VertexVertex 1: WingedEdge
-  int renderingMode = 0; // 0: Immediate 1: Retained
+  int representationMode = 0; // 0: WingedEdge 1: FaceVertex
+  int renderingMode = 1; // 0: Immediate 1: Retained
+  
+  LimitedSizeQueue<Vector> bezierPoints = new LimitedSizeQueue(4);
+  PShape g;
 
-  Boid(Vector inPos) {
+  Boid(Vector inPos, PShape group) {
+    g = group;
     position = new Vector();
     position.set(inPos);
     frame = new Frame(scene) {
@@ -114,7 +118,8 @@ class Boid {
     frame.setPosition(position);
     frame.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), atan2(-velocity.z(), velocity.x())), 
       new Quaternion(new Vector(0, 0, 1), asin(velocity.y() / velocity.magnitude()))));
-    acceleration.multiply(0); // reset acceleration
+    acceleration.multiply(0); // reset acceleration  
+    //drawBezier(position);
   }
 
   void checkBounds() {
@@ -131,10 +136,23 @@ class Boid {
     if (position.z() < 0)
       position.setZ(flockDepth);
   }
-
+  void drawBezier(Vector position) {
+    //Draws a bezier with 4 control points
+    this.bezierPoints.add(position);
+    
+    pushStyle();
+    beginShape(POINTS);
+    strokeWeight(5);
+    stroke(255, 102, 0);
+    if (this.bezierPoints.size() == 4) {
+      vertex(this.bezierPoints.get(0).x() / sc, this.bezierPoints.get(0).y() / sc, this.bezierPoints.get(0).z() / sc);
+      println("Bezier: " + this.bezierPoints);
+    }
+    endShape();
+    popStyle();
+  }
   void render() {
     pushStyle();
-
     // uncomment to draw boid axes
     //scene.drawAxes(10);
 
@@ -161,20 +179,25 @@ class Boid {
     Vertex v4 = new Vertex(-3 * sc, 0, 2 * sc);
     
     if (this.representationMode == 0) {
-      VertexVertex mesh = new VertexVertex();
-      Vertex[] nb1 = { v2, v3, v4 };
-      Vertex[] nb2 = { v1, v3, v4 };
-      Vertex[] nb3 = { v1, v2, v4 };
-      Vertex[] nb4 = { v1, v2, v3 };
-      mesh.put(v1, nb1);
-      mesh.put(v2, nb2);
-      mesh.put(v3, nb3);
-      mesh.put(v4, nb4);
+      pushStyle();
+    // uncomment to draw boid axes
+    //scene.drawAxes(10);
+
+    strokeWeight(2);
+    stroke(color(40, 255, 40));
+      WingedEdge mesh = new WingedEdge();
+      Vertex[] face0 = {v1, v2, v3};
+      Vertex[] face1 = {v1, v2, v4};
+      Vertex[] face2 = {v2, v3, v4};
+      mesh.addFace(0, face0);
+      mesh.addFace(1, face1);
+      mesh.addFace(2, face2);
       
       if (this.renderingMode == 0) {
         mesh.renderImmediate();
       }
       else {
+        //g.addChild(mesh.renderRetained());
         shape(mesh.renderRetained());
       }
     }
@@ -215,5 +238,7 @@ class Boid {
     endShape();*/
 
     popStyle();
+    
+    // drawBezier();
   }
 }
